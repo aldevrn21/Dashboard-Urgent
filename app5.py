@@ -221,18 +221,8 @@ with tab_daftar:
         c4.metric("Sudah Dikerjakan", (df_filtered["status"] == "Sudah Dikerjakan").sum())
         st.divider()
 
-        # --- LEGENDA WARNA URGENSI ---
-        st.markdown(
-            "🟥 Urgensi Tinggi &nbsp;&nbsp; 🟨 Urgensi Sedang &nbsp;&nbsp; 🟩 Urgensi Rendah",
-        )
-        st.write("")
-
-        # --- WARNA KARTU BERDASARKAN URGENSI ---
-        WARNA_URGENSI = {
-            "Tinggi": "#e05555",   # merah
-            "Sedang": "#e0c040",  # kuning
-            "Rendah": "#4caf7d",   # hijau
-        }
+        # --- KOTAK WARNA URGENSI (ditampilkan di judul kartu) ---
+        KOTAK_URGENSI = {"Tinggi": "🟥", "Sedang": "🟨", "Rendah": "🟩"}
 
         # --- TAMPILAN KANBAN (STATUS MENDATAR, KE BAWAH ISI KARTU) ---
         kolom_status = st.columns(len(STATUS_OPTIONS))
@@ -248,27 +238,13 @@ with tab_daftar:
                     st.caption("Tidak ada pekerjaan di status ini.")
 
                 for _, row in df_status.iterrows():
-                    warna = WARNA_URGENSI.get(row["urgensi"], "#888888")
+                    kotak = KOTAK_URGENSI.get(row["urgensi"], "⬜")
 
-                    st.markdown(
-                        f"""
-                        <div style="
-                            border-left: 6px solid {warna};
-                            background-color: rgba(255,255,255,0.03);
-                            border-radius: 6px;
-                            padding: 10px 12px;
-                            margin-bottom: 6px;
-                        ">
-                            <b>{row['nama_pekerjaan']}</b>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    with st.container(border=True):
+                    with st.expander(f"{kotak} {row['nama_pekerjaan']}"):
                         ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
                         if ada_foto:
-                            with st.expander("📷 Lihat Foto"):
+                            lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
+                            if lihat_foto:
                                 st.image(row["foto_path"], use_container_width=True)
 
                         if pd.notna(row["keterangan"]) and str(row["keterangan"]).strip():
