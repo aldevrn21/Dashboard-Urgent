@@ -221,8 +221,12 @@ with tab_daftar:
         c4.metric("Sudah Dikerjakan", (df_filtered["status"] == "Sudah Dikerjakan").sum())
         st.divider()
 
-        # --- KOTAK WARNA URGENSI (ditampilkan di judul kartu) ---
-        KOTAK_URGENSI = {"Tinggi": "🟥", "Sedang": "🟨", "Rendah": "🟩"}
+        # --- WARNA BADGE URGENSI ---
+        WARNA_URGENSI = {
+            "Tinggi": "#e05555",   # merah
+            "Sedang": "#e0c040",  # kuning
+            "Rendah": "#4caf7d",   # hijau
+        }
 
         # --- TAMPILAN KANBAN (STATUS MENDATAR, KE BAWAH ISI KARTU) ---
         kolom_status = st.columns(len(STATUS_OPTIONS))
@@ -238,35 +242,58 @@ with tab_daftar:
                     st.caption("Tidak ada pekerjaan di status ini.")
 
                 for _, row in df_status.iterrows():
-                    kotak = KOTAK_URGENSI.get(row["urgensi"], "⬜")
+                    warna = WARNA_URGENSI.get(row["urgensi"], "#888888")
 
-                    with st.expander(f"{kotak} {row['nama_pekerjaan']}"):
-                        ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
-                        if ada_foto:
-                            lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
-                            if lihat_foto:
-                                st.image(row["foto_path"], use_container_width=True)
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: {warna};
+                            color: #1a1a1a;
+                            font-weight: 600;
+                            border-radius: 8px;
+                            padding: 8px 14px;
+                            margin-bottom: 2px;
+                        ">
+                            {row['nama_pekerjaan']}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-                        if pd.notna(row["keterangan"]) and str(row["keterangan"]).strip():
-                            st.caption(row["keterangan"])
-                        st.caption(f"Diubah: {row['diubah_pada']}")
+                    buka_detail = st.toggle(
+                        "Lihat Detail", key=f"toggle_{row['id']}", label_visibility="visible"
+                    )
 
-                        status_baru = st.selectbox(
-                            "Pindahkan ke",
-                            STATUS_OPTIONS,
-                            index=STATUS_OPTIONS.index(row["status"]),
-                            key=f"status_{row['id']}",
-                            label_visibility="collapsed",
-                        )
-                        if status_baru != row["status"]:
-                            update_status(row["id"], status_baru)
-                            st.rerun()
+                    if buka_detail:
+                        with st.container(border=True):
+                            ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
+                            if ada_foto:
+                                lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
+                                if lihat_foto:
+                                    st.image(row["foto_path"], use_container_width=True)
 
-                        if st.button(
-                            "🗑️ Hapus", key=f"hapus_{row['id']}", use_container_width=True
-                        ):
-                            hapus_pekerjaan(row["id"])
-                            st.rerun()
+                            if pd.notna(row["keterangan"]) and str(row["keterangan"]).strip():
+                                st.caption(row["keterangan"])
+                            st.caption(f"Diubah: {row['diubah_pada']}")
+
+                            status_baru = st.selectbox(
+                                "Pindahkan ke",
+                                STATUS_OPTIONS,
+                                index=STATUS_OPTIONS.index(row["status"]),
+                                key=f"status_{row['id']}",
+                                label_visibility="collapsed",
+                            )
+                            if status_baru != row["status"]:
+                                update_status(row["id"], status_baru)
+                                st.rerun()
+
+                            if st.button(
+                                "🗑️ Hapus", key=f"hapus_{row['id']}", use_container_width=True
+                            ):
+                                hapus_pekerjaan(row["id"])
+                                st.rerun()
+
+                    st.write("")
 
         # --- EKSPOR ---
         st.divider()
