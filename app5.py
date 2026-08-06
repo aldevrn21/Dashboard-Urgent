@@ -244,12 +244,12 @@ with tab_daftar:
         css_kolom += """
             .st-key-metrik-total [data-testid="stMetricLabel"],
             .st-key-metrik-total [data-testid="stMetricValue"],
-            [class^="st-key-metrik-kolom-"] [data-testid="stMetricLabel"],
-            [class^="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
+            [class*="st-key-metrik-kolom-"] [data-testid="stMetricLabel"],
+            [class*="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
                 color: #ffffff !important;
             }
-            [class^="st-key-kolom-"] div[data-testid="stButton"] {
-                margin-bottom: -26px;
+            [class*="st-key-kolom-"] [data-testid="stVerticalBlock"] {
+                gap: 0.35rem !important;
             }
         """
         st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
