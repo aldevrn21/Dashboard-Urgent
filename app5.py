@@ -248,6 +248,9 @@ with tab_daftar:
             [class*="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
                 color: #ffffff !important;
             }
+            [class*="st-key-kolom-"] h4 {
+                color: #ffffff !important;
+            }
             [class*="st-key-kolom-"],
             [class*="st-key-kolom-"] > div,
             [class*="st-key-kolom-"] [data-testid="stVerticalBlock"] {
