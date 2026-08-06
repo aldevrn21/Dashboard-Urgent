@@ -303,9 +303,19 @@ with tab_daftar:
                             font-weight: 600;
                             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
                             border: none;
-                            text-align: left;
-                            justify-content: space-between;
-                            display: flex;
+                            text-align: left !important;
+                            position: relative;
+                            padding-right: 34px !important;
+                        }}
+                        .st-key-{kunci_tombol} button p {{
+                            text-align: left !important;
+                        }}
+                        .st-key-{kunci_tombol} button::after {{
+                            content: "{ikon}";
+                            position: absolute;
+                            right: 14px;
+                            top: 50%;
+                            transform: translateY(-50%);
                         }}
                         </style>
                         """,
@@ -313,7 +323,7 @@ with tab_daftar:
                     )
 
                     if st.button(
-                        f"{row['nama_pekerjaan']}      {ikon}",
+                        row["nama_pekerjaan"],
                         key=kunci_tombol,
                         use_container_width=True,
                     ):
