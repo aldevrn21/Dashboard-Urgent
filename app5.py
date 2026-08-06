@@ -248,8 +248,13 @@ with tab_daftar:
             [class*="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
                 color: #ffffff !important;
             }
+            [class*="st-key-kolom-"],
+            [class*="st-key-kolom-"] > div,
             [class*="st-key-kolom-"] [data-testid="stVerticalBlock"] {
                 gap: 0.35rem !important;
+            }
+            [class*="st-key-kolom-"] .element-container {
+                margin-bottom: 0.35rem !important;
             }
         """
         st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
