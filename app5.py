@@ -348,6 +348,7 @@ with tab_daftar:
                                 border: 1px solid {warna};
                                 border-radius: 10px;
                                 padding: 14px;
+                                margin-top: -10px !important;
                             }}
                             </style>
                             """,
