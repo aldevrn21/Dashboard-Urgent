@@ -223,7 +223,7 @@ with tab_daftar:
         WARNA_KOLOM = {
             "Belum Dikerjakan": "#4a4a4a",   # abu-abu gelap
             "Sedang Dikerjakan": "#2f6f9f",  # biru
-            "Sudah Dikerjakan": "#6a4c93",   # ungu tua
+            "Sudah Dikerjakan": "#2f6b4a",   # hijau tua gelap (beda shade dari badge urgensi hijau terang)
         }
         WARNA_TOTAL = "#3a3a4a"  # warna netral khusus kotak "Total Pekerjaan"
 
@@ -285,9 +285,10 @@ with tab_daftar:
                             background-color: {warna};
                             color: #1a1a1a;
                             font-weight: 600;
-                            border-radius: 8px 8px 0 0;
+                            border-radius: 8px;
                             padding: 8px 14px;
                             margin-top: 4px;
+                            margin-bottom: 8px;
                             white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;
@@ -302,7 +303,7 @@ with tab_daftar:
                     if kunci_buka not in st.session_state:
                         st.session_state[kunci_buka] = False
 
-                    label_tombol = "🔼 Tutup Detail" if st.session_state[kunci_buka] else "🔽 Lihat Detail"
+                    label_tombol = "▲ Tutup Detail" if st.session_state[kunci_buka] else "▼ Lihat Detail"
                     if st.button(label_tombol, key=f"btn_{row['id']}", use_container_width=True):
                         st.session_state[kunci_buka] = not st.session_state[kunci_buka]
                         st.rerun()
