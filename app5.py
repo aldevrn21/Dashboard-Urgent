@@ -339,7 +339,21 @@ with tab_daftar:
                         st.rerun()
 
                     if st.session_state[kunci_buka]:
-                        with st.container(border=True):
+                        kunci_detail = f"detail_{row['id']}"
+                        st.markdown(
+                            f"""
+                            <style>
+                            .st-key-{kunci_detail} {{
+                                background-color: {warna}2b;
+                                border: 1px solid {warna};
+                                border-radius: 10px;
+                                padding: 14px;
+                            }}
+                            </style>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                        with st.container(key=kunci_detail):
                             ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
                             if ada_foto:
                                 lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
