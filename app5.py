@@ -1,25 +1,22 @@
 """
-Dashboard Pekerjaan - Streamlit + SQLite
+Dashboard Pekerjaan - Streamlit + Supabase (PostgreSQL + Storage)
 Fitur:
 - Tambah pekerjaan baru (nama, urgensi, status, keterangan, foto)
-- Lihat daftar pekerjaan dalam bentuk tabel & kartu
+- Lihat daftar pekerjaan dalam bentuk kanban 3 kolom
 - Edit status pekerjaan
 - Hapus pekerjaan
-- Filter berdasarkan status & urgensi
+- Filter berdasarkan urgensi & pencarian nama
+- Data & foto tersimpan permanen di Supabase (tidak hilang saat aplikasi sleep/restart)
 """
 
 import streamlit as st
-import sqlite3
 import pandas as pd
-import os
 from datetime import datetime
 from PIL import Image
+import io
+from supabase import create_client
 
 # ---------- KONFIGURASI ----------
-DB_PATH = "pekerjaan.db"
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
 URGENSI_OPTIONS = ["Rendah", "Sedang", "Tinggi"]
 STATUS_OPTIONS = ["Belum Dikerjakan", "Sedang Dikerjakan", "Sudah Dikerjakan"]
 
@@ -30,141 +27,84 @@ STATUS_COLOR = {
     "Sudah Dikerjakan": "✅",
 }
 
+NAMA_TABEL = "pekerjaan"
+NAMA_BUCKET = "foto-pekerjaan"
+
+
+# ---------- KONEKSI SUPABASE ----------
+@st.cache_resource
+def get_supabase():
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+
+supabase = get_supabase()
+
 
 # ---------- DATABASE ----------
-def get_connection():
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    return conn
-
-
-def init_db():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        CREATE TABLE IF NOT EXISTS pekerjaan (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_pekerjaan TEXT NOT NULL,
-            urgensi TEXT NOT NULL,
-            status TEXT NOT NULL,
-            keterangan TEXT,
-            foto_path TEXT,
-            dibuat_pada TEXT,
-            diubah_pada TEXT
-        )
-        """
-    )
-    conn.commit()
-    conn.close()
-
-
-def tambah_pekerjaan(nama, urgensi, status, keterangan, foto_path):
-    conn = get_connection()
-    cur = conn.cursor()
+def tambah_pekerjaan(nama, urgensi, status, keterangan, foto_url):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cur.execute(
-        """
-        INSERT INTO pekerjaan (nama_pekerjaan, urgensi, status, keterangan, foto_path, dibuat_pada, diubah_pada)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (nama, urgensi, status, keterangan, foto_path, now, now),
-    )
-    conn.commit()
-    conn.close()
+    supabase.table(NAMA_TABEL).insert(
+        {
+            "nama_pekerjaan": nama,
+            "urgensi": urgensi,
+            "status": status,
+            "keterangan": keterangan,
+            "foto_path": foto_url,
+            "dibuat_pada": now,
+            "diubah_pada": now,
+        }
+    ).execute()
 
 
 def ambil_semua_pekerjaan():
-    conn = get_connection()
-    df = pd.read_sql_query("SELECT * FROM pekerjaan ORDER BY id DESC", conn)
-    conn.close()
-    return df
+    res = supabase.table(NAMA_TABEL).select("*").order("id", desc=True).execute()
+    kolom = [
+        "id", "nama_pekerjaan", "urgensi", "status",
+        "keterangan", "foto_path", "dibuat_pada", "diubah_pada",
+    ]
+    if not res.data:
+        return pd.DataFrame(columns=kolom)
+    return pd.DataFrame(res.data)
 
 
 def update_status(id_pekerjaan, status_baru):
-    conn = get_connection()
-    cur = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cur.execute(
-        "UPDATE pekerjaan SET status = ?, diubah_pada = ? WHERE id = ?",
-        (status_baru, now, id_pekerjaan),
-    )
-    conn.commit()
-    conn.close()
+    supabase.table(NAMA_TABEL).update(
+        {"status": status_baru, "diubah_pada": now}
+    ).eq("id", id_pekerjaan).execute()
 
 
 def hapus_pekerjaan(id_pekerjaan):
-    # ambil path foto dulu untuk dihapus juga filenya
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT foto_path FROM pekerjaan WHERE id = ?", (id_pekerjaan,))
-    row = cur.fetchone()
-    if row and row[0] and os.path.exists(row[0]):
-        os.remove(row[0])
-    cur.execute("DELETE FROM pekerjaan WHERE id = ?", (id_pekerjaan,))
-    conn.commit()
-    conn.close()
+    supabase.table(NAMA_TABEL).delete().eq("id", id_pekerjaan).execute()
 
 
 # ---------- HELPER ----------
 def simpan_foto(uploaded_file):
+    """Upload foto ke Supabase Storage, kembalikan URL publiknya."""
     if uploaded_file is None:
         return None
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-    ext = os.path.splitext(uploaded_file.name)[1]
-    filename = f"{timestamp}{ext}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
+
     image = Image.open(uploaded_file)
-    image.save(filepath)
-    return filepath
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=85)
+    buffer.seek(0)
+
+    nama_file = f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}.jpg"
+    supabase.storage.from_(NAMA_BUCKET).upload(
+        nama_file,
+        buffer.getvalue(),
+        {"content-type": "image/jpeg"},
+    )
+    return supabase.storage.from_(NAMA_BUCKET).get_public_url(nama_file)
 
 
 # ---------- APLIKASI ----------
 st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="wide")
-
-
-# ---------- LOGIN / PROTEKSI PASSWORD ----------
-def cek_password():
-    """Menampilkan form password. Return True kalau sudah login, False kalau belum."""
-
-    def password_dimasukkan():
-        password_benar = st.secrets.get("APP_PASSWORD", None)
-        if password_benar is None:
-            st.session_state["password_ok"] = True  # kalau belum di-set, jangan kunci total
-            return
-        if st.session_state.get("input_password") == password_benar:
-            st.session_state["password_ok"] = True
-        else:
-            st.session_state["password_ok"] = False
-
-    if st.session_state.get("password_ok", False):
-        return True
-
-    st.title("📋 Dashboard Pekerjaan")
-    st.markdown("Masukkan password untuk mengakses dashboard.")
-    st.text_input(
-        "Password",
-        type="password",
-        key="input_password",
-        on_change=password_dimasukkan,
-    )
-
-    if "password_ok" in st.session_state and not st.session_state["password_ok"]:
-        st.error("Password salah, coba lagi.")
-
-    if st.secrets.get("APP_PASSWORD", None) is None:
-        st.warning(
-            "⚠️ Password belum di-set di Secrets. Tambahkan APP_PASSWORD di menu "
-            "Settings > Secrets aplikasi Streamlit Anda, lalu refresh halaman ini."
-        )
-
-    return False
-
-
-if not cek_password():
-    st.stop()
-
-
-init_db()
 
 st.title("📋 Dashboard Pekerjaan")
 st.caption("Kelola dan pantau status pekerjaan tim secara real-time")
@@ -190,8 +130,8 @@ with tab_tambah:
             if not nama:
                 st.error("Nama pekerjaan wajib diisi.")
             else:
-                foto_path = simpan_foto(foto)
-                tambah_pekerjaan(nama, urgensi, status, keterangan, foto_path)
+                foto_url = simpan_foto(foto)
+                tambah_pekerjaan(nama, urgensi, status, keterangan, foto_url)
                 st.success(f"Pekerjaan '{nama}' berhasil ditambahkan.")
 
 # ===== TAB DAFTAR =====
@@ -365,7 +305,7 @@ with tab_daftar:
                             unsafe_allow_html=True,
                         )
                         with st.container(key=kunci_detail):
-                            ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
+                            ada_foto = pd.notna(row["foto_path"]) and str(row["foto_path"]).strip() != ""
                             if ada_foto:
                                 lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
                                 if lihat_foto:
