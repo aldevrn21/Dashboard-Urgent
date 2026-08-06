@@ -228,11 +228,30 @@ with tab_daftar:
             "Rendah": "#4caf7d",   # hijau
         }
 
+        # --- WARNA LATAR BELAKANG PER KOLOM STATUS ---
+        KEY_KOLOM = {
+            "Belum Dikerjakan": "kolom-belum",
+            "Sedang Dikerjakan": "kolom-sedang",
+            "Sudah Dikerjakan": "kolom-sudah",
+        }
+        WARNA_KOLOM = {
+            "Belum Dikerjakan": "#4a4a4a",   # abu-abu
+            "Sedang Dikerjakan": "#8a5a1a",  # oranye
+            "Sudah Dikerjakan": "#1a5f8a",   # biru
+        }
+
+        css_kolom = "".join(
+            f".st-key-{KEY_KOLOM[s]} {{ background-color: {WARNA_KOLOM[s]}; "
+            f"border-radius: 12px; padding: 16px; }}"
+            for s in STATUS_OPTIONS
+        )
+        st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
+
         # --- TAMPILAN KANBAN (STATUS MENDATAR) ---
         kolom_status = st.columns(len(STATUS_OPTIONS))
 
         for kolom, status_saat_ini in zip(kolom_status, STATUS_OPTIONS):
-            with kolom:
+            with kolom, st.container(key=KEY_KOLOM[status_saat_ini]):
                 df_status = df_filtered[df_filtered["status"] == status_saat_ini]
 
                 st.markdown(f"#### {STATUS_COLOR[status_saat_ini]} {status_saat_ini} ({len(df_status)})")
