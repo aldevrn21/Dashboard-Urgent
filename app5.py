@@ -249,7 +249,7 @@ with tab_daftar:
                 color: #ffffff !important;
             }
             [class^="st-key-kolom-"] div[data-testid="stButton"] {
-                margin-bottom: -14px;
+                margin-bottom: -26px;
             }
         """
         st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
