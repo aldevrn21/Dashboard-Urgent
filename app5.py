@@ -241,6 +241,14 @@ with tab_daftar:
             f".st-key-metrik-total {{ background-color: {WARNA_TOTAL}; "
             f"border-radius: 10px; padding: 12px; }}"
         )
+        css_kolom += """
+            .st-key-metrik-total [data-testid="stMetricLabel"],
+            .st-key-metrik-total [data-testid="stMetricValue"],
+            [class^="st-key-metrik-kolom-"] [data-testid="stMetricLabel"],
+            [class^="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
+                color: #ffffff !important;
+            }
+        """
         st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
 
         # --- RINGKASAN (kotak angka diwarnai sesuai kolom masing-masing) ---
@@ -283,31 +291,34 @@ with tab_daftar:
                     if kunci_buka not in st.session_state:
                         st.session_state[kunci_buka] = False
 
-                    col_badge, col_icon = st.columns([5, 1])
-                    with col_badge:
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background-color: {warna};
-                                color: #1a1a1a;
-                                font-weight: 600;
-                                border-radius: 8px;
-                                padding: 8px 14px;
-                                margin-top: 4px;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            ">
-                                {row['nama_pekerjaan']}
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    with col_icon:
-                        ikon = "✓" if st.session_state[kunci_buka] else "▾"
-                        if st.button(ikon, key=f"btn_{row['id']}", use_container_width=True):
-                            st.session_state[kunci_buka] = not st.session_state[kunci_buka]
-                            st.rerun()
+                    kunci_tombol = f"btn_{row['id']}"
+                    ikon = "▴" if st.session_state[kunci_buka] else "▾"
+
+                    st.markdown(
+                        f"""
+                        <style>
+                        .st-key-{kunci_tombol} button {{
+                            background-color: {warna} !important;
+                            color: #ffffff !important;
+                            font-weight: 600;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+                            border: none;
+                            text-align: left;
+                            justify-content: space-between;
+                            display: flex;
+                        }}
+                        </style>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                    if st.button(
+                        f"{row['nama_pekerjaan']}      {ikon}",
+                        key=kunci_tombol,
+                        use_container_width=True,
+                    ):
+                        st.session_state[kunci_buka] = not st.session_state[kunci_buka]
+                        st.rerun()
 
                     if st.session_state[kunci_buka]:
                         with st.container(border=True):
