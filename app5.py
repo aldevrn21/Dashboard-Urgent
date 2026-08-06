@@ -356,6 +356,10 @@ with tab_daftar:
                                 padding: 14px;
                                 margin-top: -12px !important;
                             }}
+                            .st-key-{kunci_detail} [data-testid="stCaptionContainer"],
+                            .st-key-{kunci_detail} small {{
+                                color: #f0f0f0 !important;
+                            }}
                             </style>
                             """,
                             unsafe_allow_html=True,
