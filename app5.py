@@ -279,34 +279,35 @@ with tab_daftar:
                 for _, row in df_status.iterrows():
                     warna = WARNA_URGENSI.get(row["urgensi"], "#888888")
 
-                    st.markdown(
-                        f"""
-                        <div style="
-                            background-color: {warna};
-                            color: #1a1a1a;
-                            font-weight: 600;
-                            border-radius: 8px;
-                            padding: 8px 14px;
-                            margin-top: 4px;
-                            margin-bottom: 8px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        ">
-                            {row['nama_pekerjaan']}
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
                     kunci_buka = f"buka_{row['id']}"
                     if kunci_buka not in st.session_state:
                         st.session_state[kunci_buka] = False
 
-                    label_tombol = "▲ Tutup Detail" if st.session_state[kunci_buka] else "▼ Lihat Detail"
-                    if st.button(label_tombol, key=f"btn_{row['id']}", use_container_width=True):
-                        st.session_state[kunci_buka] = not st.session_state[kunci_buka]
-                        st.rerun()
+                    col_badge, col_icon = st.columns([5, 1])
+                    with col_badge:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: {warna};
+                                color: #1a1a1a;
+                                font-weight: 600;
+                                border-radius: 8px;
+                                padding: 8px 14px;
+                                margin-top: 4px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            ">
+                                {row['nama_pekerjaan']}
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    with col_icon:
+                        ikon = "✓" if st.session_state[kunci_buka] else "▾"
+                        if st.button(ikon, key=f"btn_{row['id']}", use_container_width=True):
+                            st.session_state[kunci_buka] = not st.session_state[kunci_buka]
+                            st.rerun()
 
                     if st.session_state[kunci_buka]:
                         with st.container(border=True):
