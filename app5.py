@@ -212,13 +212,48 @@ with tab_daftar:
         if cari:
             df_filtered = df_filtered[df_filtered["nama_pekerjaan"].str.contains(cari, case=False, na=False)]
 
-        # --- RINGKASAN ---
+        # --- WARNA LATAR BELAKANG PER KOLOM STATUS ---
+        # Dipilih sengaja beda dari warna urgensi (merah/kuning/hijau) supaya tidak membingungkan:
+        # abu-abu (netral, belum mulai) -> biru (sedang berjalan) -> ungu tua (selesai/final)
+        KEY_KOLOM = {
+            "Belum Dikerjakan": "kolom-belum",
+            "Sedang Dikerjakan": "kolom-sedang",
+            "Sudah Dikerjakan": "kolom-sudah",
+        }
+        WARNA_KOLOM = {
+            "Belum Dikerjakan": "#4a4a4a",   # abu-abu gelap
+            "Sedang Dikerjakan": "#2f6f9f",  # biru
+            "Sudah Dikerjakan": "#6a4c93",   # ungu tua
+        }
+        WARNA_TOTAL = "#3a3a4a"  # warna netral khusus kotak "Total Pekerjaan"
+
+        css_kolom = "".join(
+            f".st-key-{KEY_KOLOM[s]} {{ background-color: {WARNA_KOLOM[s]}; "
+            f"border-radius: 12px; padding: 16px; }}"
+            for s in STATUS_OPTIONS
+        )
+        css_kolom += "".join(
+            f".st-key-metrik-{KEY_KOLOM[s]} {{ background-color: {WARNA_KOLOM[s]}; "
+            f"border-radius: 10px; padding: 12px; }}"
+            for s in STATUS_OPTIONS
+        )
+        css_kolom += (
+            f".st-key-metrik-total {{ background-color: {WARNA_TOTAL}; "
+            f"border-radius: 10px; padding: 12px; }}"
+        )
+        st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
+
+        # --- RINGKASAN (kotak angka diwarnai sesuai kolom masing-masing) ---
         st.divider()
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Total Pekerjaan", len(df_filtered))
-        c2.metric("Belum Dikerjakan", (df_filtered["status"] == "Belum Dikerjakan").sum())
-        c3.metric("Sedang Dikerjakan", (df_filtered["status"] == "Sedang Dikerjakan").sum())
-        c4.metric("Sudah Dikerjakan", (df_filtered["status"] == "Sudah Dikerjakan").sum())
+        with c1, st.container(key="metrik-total"):
+            st.metric("Total Pekerjaan", len(df_filtered))
+        with c2, st.container(key=f"metrik-{KEY_KOLOM['Belum Dikerjakan']}"):
+            st.metric("Belum Dikerjakan", (df_filtered["status"] == "Belum Dikerjakan").sum())
+        with c3, st.container(key=f"metrik-{KEY_KOLOM['Sedang Dikerjakan']}"):
+            st.metric("Sedang Dikerjakan", (df_filtered["status"] == "Sedang Dikerjakan").sum())
+        with c4, st.container(key=f"metrik-{KEY_KOLOM['Sudah Dikerjakan']}"):
+            st.metric("Sudah Dikerjakan", (df_filtered["status"] == "Sudah Dikerjakan").sum())
         st.divider()
 
         # --- WARNA BADGE URGENSI ---
@@ -227,25 +262,6 @@ with tab_daftar:
             "Sedang": "#e0c040",  # kuning
             "Rendah": "#4caf7d",   # hijau
         }
-
-        # --- WARNA LATAR BELAKANG PER KOLOM STATUS ---
-        KEY_KOLOM = {
-            "Belum Dikerjakan": "kolom-belum",
-            "Sedang Dikerjakan": "kolom-sedang",
-            "Sudah Dikerjakan": "kolom-sudah",
-        }
-        WARNA_KOLOM = {
-            "Belum Dikerjakan": "#4a4a4a",   # abu-abu
-            "Sedang Dikerjakan": "#8a5a1a",  # oranye
-            "Sudah Dikerjakan": "#1a5f8a",   # biru
-        }
-
-        css_kolom = "".join(
-            f".st-key-{KEY_KOLOM[s]} {{ background-color: {WARNA_KOLOM[s]}; "
-            f"border-radius: 12px; padding: 16px; }}"
-            for s in STATUS_OPTIONS
-        )
-        st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
 
         # --- TAMPILAN KANBAN (STATUS MENDATAR) ---
         kolom_status = st.columns(len(STATUS_OPTIONS))
@@ -263,34 +279,35 @@ with tab_daftar:
                 for _, row in df_status.iterrows():
                     warna = WARNA_URGENSI.get(row["urgensi"], "#888888")
 
-                    col_badge, col_toggle = st.columns([5, 1])
-                    with col_badge:
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background-color: {warna};
-                                color: #1a1a1a;
-                                font-weight: 600;
-                                border-radius: 8px;
-                                padding: 8px 14px;
-                                margin-top: 4px;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            ">
-                                {row['nama_pekerjaan']}
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    with col_toggle:
-                        buka_detail = st.toggle(
-                            "Lihat Detail",
-                            key=f"toggle_{row['id']}",
-                            label_visibility="collapsed",
-                        )
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: {warna};
+                            color: #1a1a1a;
+                            font-weight: 600;
+                            border-radius: 8px 8px 0 0;
+                            padding: 8px 14px;
+                            margin-top: 4px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        ">
+                            {row['nama_pekerjaan']}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-                    if buka_detail:
+                    kunci_buka = f"buka_{row['id']}"
+                    if kunci_buka not in st.session_state:
+                        st.session_state[kunci_buka] = False
+
+                    label_tombol = "🔼 Tutup Detail" if st.session_state[kunci_buka] else "🔽 Lihat Detail"
+                    if st.button(label_tombol, key=f"btn_{row['id']}", use_container_width=True):
+                        st.session_state[kunci_buka] = not st.session_state[kunci_buka]
+                        st.rerun()
+
+                    if st.session_state[kunci_buka]:
                         with st.container(border=True):
                             ada_foto = pd.notna(row["foto_path"]) and os.path.exists(str(row["foto_path"]))
                             if ada_foto:
