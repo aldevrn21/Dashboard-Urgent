@@ -228,14 +228,14 @@ with tab_daftar:
             "Rendah": "#4caf7d",   # hijau
         }
 
-        # --- TAMPILAN KANBAN (STATUS MENDATAR, KE BAWAH ISI KARTU) ---
+        # --- TAMPILAN KANBAN (STATUS MENDATAR) ---
         kolom_status = st.columns(len(STATUS_OPTIONS))
 
         for kolom, status_saat_ini in zip(kolom_status, STATUS_OPTIONS):
             with kolom:
                 df_status = df_filtered[df_filtered["status"] == status_saat_ini]
 
-                st.markdown(f"#### {status_saat_ini} ({len(df_status)})")
+                st.markdown(f"#### {STATUS_COLOR[status_saat_ini]} {status_saat_ini} ({len(df_status)})")
                 st.markdown("---")
 
                 if df_status.empty:
@@ -244,25 +244,32 @@ with tab_daftar:
                 for _, row in df_status.iterrows():
                     warna = WARNA_URGENSI.get(row["urgensi"], "#888888")
 
-                    st.markdown(
-                        f"""
-                        <div style="
-                            background-color: {warna};
-                            color: #1a1a1a;
-                            font-weight: 600;
-                            border-radius: 8px;
-                            padding: 8px 14px;
-                            margin-bottom: 2px;
-                        ">
-                            {row['nama_pekerjaan']}
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    buka_detail = st.toggle(
-                        "Lihat Detail", key=f"toggle_{row['id']}", label_visibility="visible"
-                    )
+                    col_badge, col_toggle = st.columns([5, 1])
+                    with col_badge:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: {warna};
+                                color: #1a1a1a;
+                                font-weight: 600;
+                                border-radius: 8px;
+                                padding: 8px 14px;
+                                margin-top: 4px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            ">
+                                {row['nama_pekerjaan']}
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    with col_toggle:
+                        buka_detail = st.toggle(
+                            "Lihat Detail",
+                            key=f"toggle_{row['id']}",
+                            label_visibility="collapsed",
+                        )
 
                     if buka_detail:
                         with st.container(border=True):
