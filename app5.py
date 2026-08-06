@@ -248,6 +248,9 @@ with tab_daftar:
             [class^="st-key-metrik-kolom-"] [data-testid="stMetricValue"] {
                 color: #ffffff !important;
             }
+            [class^="st-key-kolom-"] div[data-testid="stButton"] {
+                margin-bottom: -14px;
+            }
         """
         st.markdown(f"<style>{css_kolom}</style>", unsafe_allow_html=True)
 
