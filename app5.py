@@ -301,6 +301,7 @@ with tab_daftar:
 
                     kunci_tombol = f"btn_{row['id']}"
                     ikon = "▴" if st.session_state[kunci_buka] else "▾"
+                    radius_tombol = "8px 8px 0 0" if st.session_state[kunci_buka] else "8px"
 
                     st.markdown(
                         f"""
@@ -311,6 +312,7 @@ with tab_daftar:
                             font-weight: 600;
                             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
                             border: none;
+                            border-radius: {radius_tombol} !important;
                             text-align: left !important;
                             position: relative;
                             padding-right: 34px !important;
@@ -346,9 +348,10 @@ with tab_daftar:
                             .st-key-{kunci_detail} {{
                                 background-color: {warna}2b;
                                 border: 1px solid {warna};
-                                border-radius: 10px;
+                                border-top: none;
+                                border-radius: 0 0 10px 10px;
                                 padding: 14px;
-                                margin-top: -10px !important;
+                                margin-top: -12px !important;
                             }}
                             </style>
                             """,
