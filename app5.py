@@ -143,7 +143,7 @@ with tab_daftar:
         # --- FILTER ---
         col_f1, col_f2 = st.columns([1, 2])
         with col_f1:
-            filter_urgensi = st.multiselect("Filter Urgensi", URGENSI_OPTIONS, default=URGENSI_OPTIONS)
+            filter_urgensi = st.multiselect("Filter Urgensi", URGENSI_OPTIONS)
         with col_f2:
             cari = st.text_input("Cari nama pekerjaan")
 
