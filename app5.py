@@ -229,7 +229,7 @@ with tab_daftar:
             with kolom, st.container(key=KEY_KOLOM[status_saat_ini]):
                 df_status = df_filtered[df_filtered["status"] == status_saat_ini]
 
-                st.markdown(f"#### {STATUS_COLOR[status_saat_ini]} {status_saat_ini} ({len(df_status)})")
+                st.markdown(f"#### {STATUS_COLOR} {status_saat_ini} ({len(df_status)})")
                 st.markdown("---")
 
                 if df_status.empty:
