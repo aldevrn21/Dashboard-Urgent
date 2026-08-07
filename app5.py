@@ -111,7 +111,6 @@ st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="w
 if st.secrets.get("MAINTENANCE_MODE", False):
     st.title("🛠️ Sedang Maintenance")
     st.info(
-        "Dashboard sedang dalam perbaikan/pemeliharaan. "
         "Silakan coba akses lagi beberapa saat lagi."
     )
     st.stop()
