@@ -22,9 +22,9 @@ STATUS_OPTIONS = ["Belum Dikerjakan", "Sedang Dikerjakan", "Sudah Dikerjakan"]
 
 URGENSI_COLOR = {"Rendah": "🟢", "Sedang": "🟡", "Tinggi": "🔴"}
 STATUS_COLOR = {
-    "Belum Dikerjakan",
-    "Sedang Dikerjakan",
-    "Sudah Dikerjakan",
+    "Belum Dikerjakan": "⚪",
+    "Sedang Dikerjakan": "🔵",
+    "Sudah Dikerjakan": "✅",
 }
 
 NAMA_TABEL = "pekerjaan"
@@ -229,7 +229,7 @@ with tab_daftar:
             with kolom, st.container(key=KEY_KOLOM[status_saat_ini]):
                 df_status = df_filtered[df_filtered["status"] == status_saat_ini]
 
-                st.markdown(f"#### {STATUS_COLOR} {status_saat_ini} ({len(df_status)})")
+                st.markdown(f"#### {STATUS_COLOR[status_saat_ini]} {status_saat_ini} ({len(df_status)})")
                 st.markdown("---")
 
                 if df_status.empty:
