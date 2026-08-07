@@ -22,9 +22,9 @@ STATUS_OPTIONS = ["Belum Dikerjakan", "Sedang Dikerjakan", "Sudah Dikerjakan"]
 
 URGENSI_COLOR = {"Rendah": "🟢", "Sedang": "🟡", "Tinggi": "🔴"}
 STATUS_COLOR = {
-    "Belum Dikerjakan": "⚪",
-    "Sedang Dikerjakan": "🔵",
-    "Sudah Dikerjakan": "✅",
+    "Belum Dikerjakan",
+    "Sedang Dikerjakan",
+    "Sudah Dikerjakan",
 }
 
 NAMA_TABEL = "pekerjaan"
