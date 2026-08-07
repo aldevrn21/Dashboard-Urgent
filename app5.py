@@ -105,16 +105,20 @@ def simpan_foto(uploaded_file):
 # ---------- APLIKASI ----------
 st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="wide")
 
-# ---------- MODE MAINTENANCE ----------
-# Diatur lewat Streamlit Secrets: MAINTENANCE_MODE = true / false
-# Ubah nilainya kapan saja tanpa perlu ubah kode atau upload ulang ke GitHub.
 if st.secrets.get("MAINTENANCE_MODE", False):
-    st.title("🛠️ Sedang Maintenance")
-    st.info(
-        "Silakan coba akses lagi beberapa saat lagi."
-    )
-    st.stop()
+    kode_bypass = st.secrets.get("MAINTENANCE_BYPASS_CODE", None)
+    kode_dari_url = st.query_params.get("akses", None)
 
+    sudah_bypass = bool(kode_bypass) and kode_dari_url == kode_bypass
+
+    if not sudah_bypass:
+        st.title("🛠️ Sedang Maintenance")
+        st.info(
+            "Dashboard sedang dalam perbaikan/pemeliharaan. "
+            "Silakan coba akses lagi beberapa saat lagi."
+        )
+        st.stop()
+        
 st.title("📋 Dashboard Pekerjaan")
 
 tab_tambah, tab_daftar = st.tabs(["➕ Tambah Pekerjaan", "📑 Daftar Pekerjaan"])
