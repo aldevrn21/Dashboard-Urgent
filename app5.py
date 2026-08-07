@@ -306,7 +306,7 @@ with tab_daftar:
                         with st.container(key=kunci_detail):
                             ada_foto = pd.notna(row["foto_path"]) and str(row["foto_path"]).strip() != ""
                             if ada_foto:
-                                lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
+                                lihat_foto = st.checkbox("Lihat Foto", key=f"foto_{row['id']}")
                                 if lihat_foto:
                                     st.image(row["foto_path"], use_container_width=True)
 
