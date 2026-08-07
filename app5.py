@@ -22,9 +22,9 @@ STATUS_OPTIONS = ["Belum Dikerjakan", "Sedang Dikerjakan", "Sudah Dikerjakan"]
 
 URGENSI_COLOR = {"Rendah": "🟢", "Sedang": "🟡", "Tinggi": "🔴"}
 STATUS_COLOR = {
-    "Belum Dikerjakan": "⚪",
-    "Sedang Dikerjakan": "🔵",
-    "Sudah Dikerjakan": "✅",
+    "Belum Dikerjakan",
+    "Sedang Dikerjakan",
+    "Sudah Dikerjakan",
 }
 
 NAMA_TABEL = "pekerjaan"
@@ -107,7 +107,6 @@ def simpan_foto(uploaded_file):
 st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="wide")
 
 st.title("📋 Dashboard Pekerjaan")
-st.caption("Kelola dan pantau status pekerjaan tim secara real-time")
 
 tab_tambah, tab_daftar = st.tabs(["➕ Tambah Pekerjaan", "📑 Daftar Pekerjaan"])
 
@@ -307,7 +306,7 @@ with tab_daftar:
                         with st.container(key=kunci_detail):
                             ada_foto = pd.notna(row["foto_path"]) and str(row["foto_path"]).strip() != ""
                             if ada_foto:
-                                lihat_foto = st.checkbox("📷 Lihat Foto", key=f"foto_{row['id']}")
+                                lihat_foto = st.checkbox("Lihat Foto", key=f"foto_{row['id']}")
                                 if lihat_foto:
                                     st.image(row["foto_path"], use_container_width=True)
 
