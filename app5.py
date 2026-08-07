@@ -102,9 +102,19 @@ def simpan_foto(uploaded_file):
     )
     return supabase.storage.from_(NAMA_BUCKET).get_public_url(nama_file)
 
-
 # ---------- APLIKASI ----------
 st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="wide")
+
+# ---------- MODE MAINTENANCE ----------
+# Diatur lewat Streamlit Secrets: MAINTENANCE_MODE = true / false
+# Ubah nilainya kapan saja tanpa perlu ubah kode atau upload ulang ke GitHub.
+if st.secrets.get("MAINTENANCE_MODE", False):
+    st.title("🛠️ Sedang Maintenance")
+    st.info(
+        "Dashboard sedang dalam perbaikan/pemeliharaan. "
+        "Silakan coba akses lagi beberapa saat lagi."
+    )
+    st.stop()
 
 st.title("📋 Dashboard Pekerjaan")
 
