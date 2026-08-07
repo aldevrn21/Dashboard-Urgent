@@ -107,7 +107,6 @@ def simpan_foto(uploaded_file):
 st.set_page_config(page_title="Dashboard Pekerjaan", page_icon="📋", layout="wide")
 
 st.title("📋 Dashboard Pekerjaan")
-st.caption("Kelola dan pantau status pekerjaan tim secara real-time")
 
 tab_tambah, tab_daftar = st.tabs(["➕ Tambah Pekerjaan", "📑 Daftar Pekerjaan"])
 
